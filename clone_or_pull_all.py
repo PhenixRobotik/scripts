@@ -6,7 +6,9 @@ import os
 
 # user_path='users/salamandar'
 user_path = 'orgs/phenixrobotik'
-clone_dir = os.path.dirname(os.path.realpath(__file__))
+script_dir = os.path.dirname(os.path.realpath(__file__))
+current_dir = os.getcwd()
+clone_dir = current_dir
 use_ssh = True
 
 
