@@ -1,5 +1,6 @@
 #!/bin/env python2
 
+from __future__ import print_function
 import sys
 import os
 import shutil
@@ -25,8 +26,8 @@ def generate_gerber(name, output_dir):
         {'layer': pcbnew.F_SilkS, 'suffix': 'F.SilkS'},
         {'layer': pcbnew.B_SilkS, 'suffix': 'B.SilkS'},
 
-        # {'layer': pcbnew.B_Paste, 'suffix': 'B_Paste'},
-        # {'layer': pcbnew.F_Paste, 'suffix': 'F_Paste'},
+        {'layer': pcbnew.B_Paste, 'suffix': 'B.Paste'},
+        {'layer': pcbnew.F_Paste, 'suffix': 'F.Paste'},
 
         {'layer': pcbnew.B_Mask, 'suffix': 'B.Mask'},
         {'layer': pcbnew.F_Mask, 'suffix': 'F.Mask'},
@@ -82,7 +83,7 @@ def generate_drillmap(name, output_dir):
     board = pcbnew.LoadBoard(name)
     writer = pcbnew.EXCELLON_WRITER(board)
 
-    writer.SetFormat(False)
+    writer.SetFormat(True)
     writer.SetOptions(
         aMirror=False,
         aMinimalHeader=False,
@@ -113,8 +114,8 @@ if __name__ == '__main__':
     for filename in files:
         project_dir = os.path.dirname(filename)
         gerber_dir = os.path.join(project_dir, 'gerber')
-        print
-        print 'Using', filename
+        print()
+        print('Using', filename)
 
         generate_gerber(filename, 'gerber')
         generate_drillmap(filename, gerber_dir)
