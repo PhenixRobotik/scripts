@@ -43,7 +43,7 @@ def clone_or_pull(repo):
 
     print(dir)
     if os.path.exists(dir):
-        os.system('git -C ' + dir + ' pull')
+        os.system('git -C ' + dir + ' pull --recurse-submodules')
     else:
         os.system('git clone --recursive ' + url + ' ' + dir)
 
