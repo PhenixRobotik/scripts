@@ -15,11 +15,11 @@ use_ssh = True
 def fetch_repos_list(user):
     def page_url(user, page, count):
         return ('https://api.github.com/' + user + '/repos'
-            + '?page=' + str(page)
-            + '&per_page=' + str(count))
+                + '?page=' + str(page)
+                + '&per_page=' + str(count))
 
     page = 1
-    repos= []
+    repos = []
     while True:
         count = 1000
         data = requests.get(page_url(user_path, page, count))
@@ -48,6 +48,6 @@ def clone_or_pull(repo):
         os.system('git clone --recursive ' + url + ' ' + dir)
 
 
-
-for repo in fetch_repos_list(user_path):
-    clone_or_pull(repo)
+if __name__ == '__main__':
+    for repo in fetch_repos_list(user_path):
+        clone_or_pull(repo)
