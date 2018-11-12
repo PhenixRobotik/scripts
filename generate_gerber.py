@@ -103,15 +103,17 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         import glob
         for file in glob.glob("*.kicad_pcb"):
-            print(file)
+            print 'Using', file
             filename = file
+            project_dir = os.getcwd()
 
     if len(sys.argv) == 2:
         filename = sys.argv[1]
+        project_dir = os.path.dirname(filename)
 
 
     generate_gerber(filename, 'gerber')
     generate_drillmap(filename, 'gerber')
 
     zipname, ext = os.path.splitext(filename)
-    archive_dir('gerber', zipname)
+    archive_dir(os.path.join(project_dir, 'gerber'), zipname)
