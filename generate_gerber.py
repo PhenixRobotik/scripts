@@ -110,11 +110,12 @@ if __name__ == '__main__':
 
     for filename in files:
         project_dir = os.path.dirname(filename)
+        gerber_dir = os.path.join(project_dir, 'gerber')
         print
         print 'Using', filename
 
         generate_gerber(filename, 'gerber')
-        generate_drillmap(filename, 'gerber')
+        generate_drillmap(filename, gerber_dir)
 
         zipname, ext = os.path.splitext(filename)
-        archive_dir(os.path.join(project_dir, 'gerber'), zipname)
+        archive_dir(gerber_dir, zipname)
