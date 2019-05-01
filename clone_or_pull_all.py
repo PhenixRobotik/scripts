@@ -3,6 +3,7 @@
 import requests
 import json
 import os
+import subprocess
 
 import multiprocessing
 
@@ -45,9 +46,17 @@ def clone_or_pull(repo):
 
     print(dir)
     if os.path.exists(dir):
-        return os.system('git -C ' + dir + ' pull --recurse-submodules')
+        cmd = [ 'git', '-C', dir, 'pull', '--recurse-submodules' ]
     else:
-        return os.system('git clone --recursive ' + url + ' ' + dir)
+        cmd = [ 'git', 'clone', '--recursive', url, dir ]
+
+    proc = subprocess.Popen(cmd,
+        stderr = subprocess.PIPE,
+    )
+    stdout, stderr = proc.communicate()
+
+    return proc.returncode, stderr.decode('utf-8')
+
 
 
 if __name__ == '__main__':
@@ -60,5 +69,6 @@ if __name__ == '__main__':
     results_zipped = tuple(zip(repos_list, results))
 
     for i in results_zipped:
-        if i[1] != 0:
+        if i[1][0] != 0:
             print('Could not update repo', i[0]['name'])
+            print(i[1][1])
