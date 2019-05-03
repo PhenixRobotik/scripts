@@ -3,6 +3,7 @@
 import requests
 import json
 import os
+import sys
 import subprocess
 
 import multiprocessing
@@ -57,7 +58,12 @@ def clone_or_pull(repo):
 
 
 if __name__ == '__main__':
-    clone_or_pull({'name': 'scripts'})
+    # Update script then call self 
+    if len(sys.argv) > 1 and sys.argv[1] == 'no-recall':
+        pass
+    else:
+        clone_or_pull({'name': 'scripts'})
+        os.execv(__file__, sys.argv + ['no-recall'])
 
     repos_list = fetch_repos_list(user_path)
     # for repo in repos_list:
