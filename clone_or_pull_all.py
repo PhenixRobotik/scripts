@@ -39,15 +39,12 @@ def fetch_repos_list(user):
 
 def clone_or_pull(repo):
     dir = clone_dir + '/' + repo['name']
-    if use_ssh:
-        url = repo['ssh_url']
-    else:
-        url = repo['html_url']
 
     print(dir)
     if os.path.exists(dir):
         cmd = [ 'git', '-C', dir, 'pull', '--recurse-submodules' ]
     else:
+        url = repo['ssh_url'] if use_ssh else repo['html_url']
         cmd = [ 'git', 'clone', '--recursive', url, dir ]
 
     proc = subprocess.Popen(cmd,
@@ -60,6 +57,8 @@ def clone_or_pull(repo):
 
 
 if __name__ == '__main__':
+    clone_or_pull({'name': 'scripts'})
+
     repos_list = fetch_repos_list(user_path)
     # for repo in repos_list:
     #     clone_or_pull(repo)
