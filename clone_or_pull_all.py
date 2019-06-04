@@ -56,24 +56,27 @@ def clone_or_pull(repo):
     return proc.returncode, stderr.decode('utf-8')
 
 
+def process_repositories(process_name, function):
+    repos_list = fetch_repos_list(user_path)
+    # for repo in repos_list:
+    #     clone_or_pull(repo)
+
+    pool = multiprocessing.Pool()
+    results = pool.map(function, repos_list)
+    results_zipped = tuple(zip(repos_list, results))
+
+    for i in results_zipped:
+        if i[1][0] != 0:
+            print('Could not', process_name, 'repo', i[0]['name'])
+            print(i[1][1])
+
 
 if __name__ == '__main__':
-    # Update script then call self 
+    # Update script then call self
     if len(sys.argv) > 1 and sys.argv[1] == 'no-recall':
         pass
     else:
         clone_or_pull({'name': 'scripts'})
         os.execv(__file__, sys.argv + ['no-recall'])
 
-    repos_list = fetch_repos_list(user_path)
-    # for repo in repos_list:
-    #     clone_or_pull(repo)
-
-    pool = multiprocessing.Pool()
-    results = pool.map(clone_or_pull, repos_list)
-    results_zipped = tuple(zip(repos_list, results))
-
-    for i in results_zipped:
-        if i[1][0] != 0:
-            print('Could not update repo', i[0]['name'])
-            print(i[1][1])
+    process_repositories('update', clone_or_pull)
