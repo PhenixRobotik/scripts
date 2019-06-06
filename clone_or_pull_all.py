@@ -77,6 +77,6 @@ if __name__ == '__main__':
         pass
     else:
         clone_or_pull({'name': 'scripts'})
-        os.execv(__file__, sys.argv + ['no-recall'])
+        os.execv(sys.executable, ['python'] + sys.argv + ['no-recall'])
 
     process_repositories('update', clone_or_pull)
