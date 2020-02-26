@@ -1,10 +1,18 @@
 #!/bin/env python3
 
+# ----------------------------------------------------------------------------
+# "THE BEER-WARE LICENSE" (Revision 42):
+# Salamandar <felix@piedallu.me> wrote this file. As long as you retain this notice you
+# can do whatever you want with this stuff. If we meet some day, and you think
+# this stuff is worth it, you can buy me a beer in return. Félix Piédallu
+# ----------------------------------------------------------------------------
+
 import sys
 import os
 import shutil
 import pcbnew
-
+import csv
+import re
 
 def generate_gerber(name, output_dir):
     board = pcbnew.LoadBoard(name)
@@ -81,6 +89,7 @@ def generate_gerber(name, output_dir):
 def generate_drillmap(name, output_dir):
     board = pcbnew.LoadBoard(name)
     writer = pcbnew.EXCELLON_WRITER(board)
+    print('Drill map')
 
     writer.SetFormat(True)
     writer.SetOptions(
@@ -95,6 +104,55 @@ def generate_drillmap(name, output_dir):
         aGenMap=False,
         aReporter=None
     )
+
+def generate_position_csv(name, output_dir):
+    board = pcbnew.LoadBoard(name)
+    board_name, ext = os.path.splitext(name)
+    print('Position file')
+
+    with open(os.path.join(output_dir, board_name + '-top-pos.csv'), 'w', newline='') as out_top,\
+         open(os.path.join(output_dir, board_name + '-bottom-pos.csv'), 'w', newline='') as out_bot:
+            fieldnames = ['Ref','Val','Package','PosX','PosY','Rot','Side']
+            csv_top = csv.DictWriter(out_top, fieldnames=fieldnames, quoting=csv.QUOTE_NONNUMERIC)
+            csv_bot = csv.DictWriter(out_bot, fieldnames=fieldnames, quoting=csv.QUOTE_NONNUMERIC)
+            csv_top.writeheader()
+            csv_bot.writeheader()
+
+            def sorted_nicely(l):
+                convert = lambda text: int(text) if text.isdigit() else text
+                alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key.GetReference())]
+                return sorted(l, key = alphanum_key)
+
+            sorted_modules = sorted_nicely(board.GetModules())
+
+            aux_origin = board.GetAuxOrigin()
+
+            for m in sorted_modules:
+                is_cms = (m.GetAttributes() == pcbnew.MOD_CMS)
+                is_top = not m.IsFlipped()
+                is_bot = not is_top
+
+                if not is_cms:
+                    continue
+
+                side =  'top'     if is_top \
+                else    'bottom'  if is_bot \
+                else    'none'
+
+                values = {
+                    'Ref': m.GetReference(),
+                    'Val': m.GetValue(),
+                    'Package': m.GetFPID().GetLibItemName(),
+                    'PosX': pcbnew.ToMM(m.GetPosition().x - aux_origin.x),
+                    'PosY': pcbnew.ToMM(aux_origin.y - m.GetPosition().y),
+                    'Rot': m.GetOrientationDegrees(),
+                    'Side': side,
+                }
+
+                if side == 'top':
+                    csv_top.writerow(values)
+                if side == 'bottom':
+                    csv_bot.writerow(values)
 
 
 def archive_dir(dirname, filename):
@@ -113,11 +171,12 @@ if __name__ == '__main__':
     for filename in files:
         project_dir = os.path.dirname(filename)
         gerber_dir = os.path.join(project_dir, 'gerber')
-        print()
         print('Using', filename)
 
         generate_gerber(filename, 'gerber')
         generate_drillmap(filename, gerber_dir)
+        generate_position_csv(filename, 'gerber')
 
         zipname, ext = os.path.splitext(filename)
         archive_dir(gerber_dir, zipname)
+
