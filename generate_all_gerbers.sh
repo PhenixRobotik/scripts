@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 for pcb in $(find . -name "*.kicad_pcb"); do
   ./scripts/generate_gerber.py "${pcb}"

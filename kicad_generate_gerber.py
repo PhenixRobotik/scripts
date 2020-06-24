@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 
 # ----------------------------------------------------------------------------
 # "THE BEER-WARE LICENSE" (Revision 42):
